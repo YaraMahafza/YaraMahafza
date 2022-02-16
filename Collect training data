@@ -1,0 +1,30 @@
+import pathlib
+
+from scipy import sparse
+import pandas as pd
+from joblib import Memory
+from nilearn import plotting
+
+from neuroquery import datasets
+from neuroquery.img_utils import coordinates_to_maps
+from neuroquery.smoothed_regression import SmoothedRegression
+from neuroquery.tokenization import TextVectorizer
+from neuroquery.encoding import NeuroQueryModel
+
+# Choose where to store the cache and the model once it is trained
+output_directory = "trained_text_to_brain_model"
+cache_directory = "cache"
+
+data_dir = pathlib.Path(datasets.fetch_neuroquery_model())
+
+corpus_metadata = pd.read_csv(str(data_dir / "corpus_metadata.csv"))
+vectorizer = TextVectorizer.from_vocabulary_file(
+    str(data_dir / "vocabulary.csv")
+)
+
+# The TFIDF features stored with NeuroQuery data correspond to the terms in
+# `vocabulary.csv` and the studies in `corpus_metadata.csv`;
+# see `README.md` in the data directory for details
+tfidf = sparse.load_npz(str(data_dir / "corpus_tfidf.npz"))
+
+coordinates = pd.read_csv(datasets.fetch_peak_coordinates()
